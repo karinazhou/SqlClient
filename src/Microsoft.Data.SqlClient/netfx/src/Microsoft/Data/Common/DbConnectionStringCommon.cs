@@ -822,6 +822,7 @@ namespace Microsoft.Data.Common
         /// </summary>
         const string AttestationProtocolHGS = "HGS";
         const string AttestationProtocolAAS = "AAS";
+        const string AttestationProtocolSIM = "SIM";
 
         /// <summary>
         ///  Convert a string value to the corresponding SqlConnectionAttestationProtocol
@@ -841,6 +842,11 @@ namespace Microsoft.Data.Common
                 result = SqlConnectionAttestationProtocol.AAS;
                 return true;
             }
+            else if (StringComparer.InvariantCultureIgnoreCase.Equals(value, AttestationProtocolSIM))
+            {
+                result = SqlConnectionAttestationProtocol.SIM;
+                return true;
+            }
             else
             {
                 result = DbConnectionStringDefaults.AttestationProtocol;
@@ -850,10 +856,11 @@ namespace Microsoft.Data.Common
 
         internal static bool IsValidAttestationProtocol(SqlConnectionAttestationProtocol value)
         {
-            Debug.Assert(Enum.GetNames(typeof(SqlConnectionAttestationProtocol)).Length == 3, "SqlConnectionAttestationProtocol enum has changed, update needed");
+            Debug.Assert(Enum.GetNames(typeof(SqlConnectionAttestationProtocol)).Length == 4, "SqlConnectionAttestationProtocol enum has changed, update needed");
             return value == SqlConnectionAttestationProtocol.NotSpecified
                 || value == SqlConnectionAttestationProtocol.HGS
-                || value == SqlConnectionAttestationProtocol.AAS;
+                || value == SqlConnectionAttestationProtocol.AAS
+                || value == SqlConnectionAttestationProtocol.SIM;
 
         }
 
@@ -867,6 +874,8 @@ namespace Microsoft.Data.Common
                     return AttestationProtocolHGS;
                 case SqlConnectionAttestationProtocol.AAS:
                     return AttestationProtocolAAS;
+                case SqlConnectionAttestationProtocol.SIM:
+                    return AttestationProtocolSIM;
                 default:
                     return null;
             }

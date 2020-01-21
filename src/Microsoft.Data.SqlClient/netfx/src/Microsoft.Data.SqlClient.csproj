@@ -95,6 +95,7 @@
     <Compile Include="Microsoft\Data\SqlClient\ApplicationIntent.cs" />
     <Compile Include="Microsoft\Data\SqlClient\assemblycache.cs" />
     <Compile Include="Microsoft\Data\SqlClient\AzureAttestationBasedEnclaveProvider.cs" />
+    <Compile Include="Microsoft\Data\SqlClient\SimulatorEnclaveProvider.cs" />
     <Compile Include="Microsoft\Data\SqlClient\ColumnEncryptionKeyInfo.cs" />
     <Compile Include="Microsoft\Data\SqlClient\ActiveDirectoryAuthenticationTimeoutRetryHelper.cs" />
     <Compile Include="Microsoft\Data\SqlClient\EnclaveDelegate.cs" />

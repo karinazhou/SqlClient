@@ -3021,14 +3021,16 @@ namespace Microsoft.Data.SqlClient
             {
                 case TdsEnums.ENCLAVE_TYPE_VBS:
                     if (attestationProtocol != SqlConnectionAttestationProtocol.AAS
-                        && attestationProtocol != SqlConnectionAttestationProtocol.HGS)
+                        && attestationProtocol != SqlConnectionAttestationProtocol.HGS
+                        && attestationProtocol != SqlConnectionAttestationProtocol.SIM)
                     {
                         return false;
                     }
                     break;
 
                 case TdsEnums.ENCLAVE_TYPE_SGX:
-                    if (attestationProtocol != SqlConnectionAttestationProtocol.AAS)
+                    if (attestationProtocol != SqlConnectionAttestationProtocol.AAS
+                        && attestationProtocol != SqlConnectionAttestationProtocol.SIM)
                     {
                         return false;
                     }
@@ -3051,6 +3053,9 @@ namespace Microsoft.Data.SqlClient
 
                 case SqlConnectionAttestationProtocol.HGS:
                     return "HGS";
+
+                case SqlConnectionAttestationProtocol.SIM:
+                    return "SIM";
 
                 default:
                     return "NotSpecified";

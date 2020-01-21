@@ -212,6 +212,12 @@ namespace Microsoft.Data.SqlClient
                         sqlColumnEncryptionEnclaveProvider = EnclaveProviders[attestationProtocol];
                         break;
 
+                    case SqlConnectionAttestationProtocol.SIM:
+                        SimulatorEnclaveProvider simulatorEnclaveProvider = new SimulatorEnclaveProvider();
+                        EnclaveProviders[attestationProtocol] = (SqlColumnEncryptionEnclaveProvider)simulatorEnclaveProvider;
+                        sqlColumnEncryptionEnclaveProvider = EnclaveProviders[attestationProtocol];
+                        break;
+
                     default:
                         break;
                 }
@@ -234,6 +240,9 @@ namespace Microsoft.Data.SqlClient
 
                 case SqlConnectionAttestationProtocol.HGS:
                     return "HGS";
+
+                case SqlConnectionAttestationProtocol.SIM:
+                    return "SIM";
 
                 default:
                     return "NotSpecified";
