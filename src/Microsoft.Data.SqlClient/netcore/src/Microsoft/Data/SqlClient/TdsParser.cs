@@ -3017,7 +3017,7 @@ namespace Microsoft.Data.SqlClient
 
         private bool IsValidAttestationProtocol(SqlConnectionAttestationProtocol attestationProtocol, string enclaveType)
         {
-            switch (enclaveType)
+            switch (enclaveType.ToUpper())
             {
                 case TdsEnums.ENCLAVE_TYPE_VBS:
                     if (attestationProtocol != SqlConnectionAttestationProtocol.AAS
@@ -3031,6 +3031,13 @@ namespace Microsoft.Data.SqlClient
                 case TdsEnums.ENCLAVE_TYPE_SGX:
                     if (attestationProtocol != SqlConnectionAttestationProtocol.AAS
                         && attestationProtocol != SqlConnectionAttestationProtocol.SIM)
+                    {
+                        return false;
+                    }
+                    break;
+
+                case TdsEnums.ENCLAVE_TYPE_SIMULATOR:
+                    if (attestationProtocol != SqlConnectionAttestationProtocol.SIM)
                     {
                         return false;
                     }

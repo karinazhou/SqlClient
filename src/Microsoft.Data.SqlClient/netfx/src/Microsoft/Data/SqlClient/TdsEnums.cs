@@ -947,6 +947,7 @@ namespace Microsoft.Data.SqlClient
         internal const int AEAD_AES_256_CBC_HMAC_SHA256 = 2;
         internal const string ENCLAVE_TYPE_VBS = "VBS";
         internal const string ENCLAVE_TYPE_SGX = "SGX";
+        internal const string ENCLAVE_TYPE_SIMULATOR = "SIMULATOR";
 
         // TCE Param names for exec handling
         internal const string TCE_PARAM_CIPHERTEXT = "cipherText";
