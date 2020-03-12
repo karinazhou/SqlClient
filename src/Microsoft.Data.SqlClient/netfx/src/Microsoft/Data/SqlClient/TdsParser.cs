@@ -8517,6 +8517,24 @@ namespace Microsoft.Data.SqlClient
             return len;
         }
 
+        // kz
+        #region kz DNSCaching
+        internal int WriteAzureSQLDNSCachingFeatureRequest(bool write /* if false just calculates the length */)
+        {
+            int len = 5; // 1byte = featureID, 4bytes = featureData length
+
+            if (write)
+            {
+                // Write Feature ID
+                _physicalStateObj.WriteByte(TdsEnums.FEATUREEXT_AZURESQLDNSCACHING);
+                WriteInt(0, _physicalStateObj); // we don't send any data
+            }
+
+            return len;
+        }
+
+        #endregion kz DNSCaching
+
         internal void TdsLogin(SqlLogin rec,
                                TdsEnums.FeatureExtension requestedFeatures,
                                SessionData recoverySessionData,
@@ -8704,6 +8722,16 @@ namespace Microsoft.Data.SqlClient
                     {
                         length += WriteUTF8SupportFeatureRequest(false);
                     }
+
+                    // kz
+                    #region kz DNSCaching
+                    if ((requestedFeatures & TdsEnums.FeatureExtension.AzureSQLDNSCaching) != 0)
+                    {
+                        length += WriteAzureSQLDNSCachingFeatureRequest(false);
+                    }
+
+                    #endregion kz DNSCaching
+
                     length++; // for terminator
                 }
             }
@@ -8975,6 +9003,17 @@ namespace Microsoft.Data.SqlClient
                     {
                         WriteUTF8SupportFeatureRequest(true);
                     }
+
+                    // kz
+                    #region kz DNSCaching
+
+                    if ((requestedFeatures & TdsEnums.FeatureExtension.AzureSQLDNSCaching) != 0)
+                    {
+                        WriteAzureSQLDNSCachingFeatureRequest(true);
+                    }
+
+                    #endregion kz DNSCaching
+
                     _physicalStateObj.WriteByte(0xFF); // terminator
                 }
             } // try
