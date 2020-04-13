@@ -137,6 +137,7 @@ namespace Microsoft.Data.SqlClient
         private readonly UInt32 _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
+        // kz to do
         // creates a physical connection
         internal SNIHandle(
             SNINativeMethodWrapper.ConsumerInfo myInfo,
@@ -149,7 +150,8 @@ namespace Microsoft.Data.SqlClient
             bool fSync,
             bool fParallel,
             TransparentNetworkResolutionState transparentNetworkResolutionState,
-            int totalTimeout)
+            int totalTimeout,
+            AzureSQLDNSInfo cachedDNSInfo)
             : base(IntPtr.Zero, true)
         {
 
@@ -171,19 +173,20 @@ namespace Microsoft.Data.SqlClient
                 int transparentNetworkResolutionStateNo = (int)transparentNetworkResolutionState;
                 _status = SNINativeMethodWrapper.SNIOpenSyncEx(myInfo, serverName, ref base.handle,
                             spnBuffer, instanceName, flushCache, fSync, timeout, fParallel, transparentNetworkResolutionStateNo, totalTimeout,
-                            ADP.IsAzureSqlServerEndpoint(serverName));
+                            ADP.IsAzureSqlServerEndpoint(serverName), cachedDNSInfo);
             }
         }
 
+        // kz to do?
         // constructs SNI Handle for MARS session
-        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent) : base(IntPtr.Zero, true)
+        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent, AzureSQLDNSInfo cachedDNSInfo) : base(IntPtr.Zero, true)
         {
             RuntimeHelpers.PrepareConstrainedRegions();
             try
             { }
             finally
             {
-                _status = SNINativeMethodWrapper.SNIOpenMarsSession(myInfo, parent, ref base.handle, parent._fSync);
+                _status = SNINativeMethodWrapper.SNIOpenMarsSession(myInfo, parent, ref base.handle, parent._fSync, cachedDNSInfo);
             }
         }
 
