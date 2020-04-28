@@ -825,7 +825,7 @@ namespace Microsoft.Data.SqlClient
             return myInfo;
         }
 
-        // kz to modify
+        // kz
         internal void CreatePhysicalSNIHandle(string serverName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, byte[] spnBuffer, bool flushCache, bool async, bool fParallel, TransparentNetworkResolutionState transparentNetworkResolutionState, int totalTimeout, string cachedFQDN)
         {
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);

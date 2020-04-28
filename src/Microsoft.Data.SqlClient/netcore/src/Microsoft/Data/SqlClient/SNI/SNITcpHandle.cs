@@ -101,11 +101,25 @@ namespace Microsoft.Data.SqlClient.SNI
         /// <param name="timerExpire">Connection timer expiration</param>
         /// <param name="callbackObject">Callback object</param>
         /// <param name="parallel">Parallel executions</param>
-        public SNITCPHandle(string serverName, int port, long timerExpire, object callbackObject, bool parallel)
+        /// <param name="cachedFQDN">Key for DNS Cache</param>
+        /// <param name="pendingDNSInfo">Used for DNS Cache</param>
+        public SNITCPHandle(string serverName, int port, long timerExpire, object callbackObject, bool parallel, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo)
         {
             _callbackObject = callbackObject;
             _targetServer = serverName;
             _sendSync = new object();
+
+            AzureSQLDNSInfo cachedDNSInfo;
+            bool hasCachedDNSInfo = AzureSQLDNSCache.Instance.GetDNSInfo(cachedFQDN, out cachedDNSInfo);
+
+            // kz debug only
+            if (hasCachedDNSInfo)
+            {
+                Console.WriteLine("cached FQDN : {0}", cachedDNSInfo.FQDN);
+                Console.WriteLine("cached IPv4 : {0}", String.IsNullOrEmpty(cachedDNSInfo.AddrIPv4) ? "Null / Empty" : cachedDNSInfo.AddrIPv4);
+                Console.WriteLine("cached IPv6 : {0}", String.IsNullOrEmpty(cachedDNSInfo.AddrIPv6) ? "Null / Empty" : cachedDNSInfo.AddrIPv6);
+                Console.WriteLine("cached Port : {0}", String.IsNullOrEmpty(cachedDNSInfo.Port) ? "Null / Empty" : cachedDNSInfo.Port);
+            }
 
             try
             {
@@ -120,33 +134,67 @@ namespace Microsoft.Data.SqlClient.SNI
                     ts = ts.Ticks < 0 ? TimeSpan.FromTicks(0) : ts;
                 }
 
-                Task<Socket> connectTask;
-                if (parallel)
+                bool reportError = true;
+
+                try
                 {
-                    Task<IPAddress[]> serverAddrTask = Dns.GetHostAddressesAsync(serverName);
-                    serverAddrTask.Wait(ts);
-                    IPAddress[] serverAddresses = serverAddrTask.Result;
-
-                    if (serverAddresses.Length > MaxParallelIpAddresses)
+                    if (parallel)
                     {
-                        // Fail if above 64 to match legacy behavior
-                        ReportTcpSNIError(0, SNICommon.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
-                        return;
+                        _socket = TryConnectParallel(serverName, port, ts, isInfiniteTimeOut, ref reportError, cachedFQDN, ref pendingDNSInfo);
                     }
-
-                    connectTask = ParallelConnectAsync(serverAddresses, port);
-
-                    if (!(isInfiniteTimeOut ? connectTask.Wait(-1) : connectTask.Wait(ts)))
+                    else
                     {
-                        ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
-                        return;
+                        _socket = Connect(serverName, port, ts, isInfiniteTimeOut, cachedFQDN, ref pendingDNSInfo);
                     }
-
-                    _socket = connectTask.Result;
                 }
-                else
+                catch (Exception ex)
                 {
-                    _socket = Connect(serverName, port, ts, isInfiniteTimeOut);
+                    // Retry with cached IP address
+                    if (ex is SocketException || ex is ArgumentException)
+                    {                       
+                        if (hasCachedDNSInfo == false)
+                        {
+                            throw;
+                        }
+                        else
+                        {
+                            int portRetry = String.IsNullOrEmpty(cachedDNSInfo.Port) ? port : Int32.Parse(cachedDNSInfo.Port); 
+
+                            try
+                            {
+                                if (parallel)
+                                {
+                                    _socket = TryConnectParallel(cachedDNSInfo.AddrIPv4, portRetry, ts, isInfiniteTimeOut, ref reportError, cachedFQDN, ref pendingDNSInfo);
+                                }
+                                else
+                                {
+                                    _socket = Connect(cachedDNSInfo.AddrIPv4, portRetry, ts, isInfiniteTimeOut, cachedFQDN, ref pendingDNSInfo);
+                                }
+                            }
+                            catch(Exception exRetry)
+                            {
+                                if (exRetry is SocketException || exRetry is ArgumentNullException || exRetry is ArgumentException || exRetry is ArgumentOutOfRangeException)
+                                {
+                                    if (parallel)
+                                    {
+                                        _socket = TryConnectParallel(cachedDNSInfo.AddrIPv6, portRetry, ts, isInfiniteTimeOut, ref reportError, cachedFQDN, ref pendingDNSInfo);
+                                    }
+                                    else
+                                    {
+                                        _socket = Connect(cachedDNSInfo.AddrIPv6, portRetry, ts, isInfiniteTimeOut, cachedFQDN, ref pendingDNSInfo);
+                                    }
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
+                        }                        
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
 
                 if (_socket == null || !_socket.Connected)
@@ -156,7 +204,11 @@ namespace Microsoft.Data.SqlClient.SNI
                         _socket.Dispose();
                         _socket = null;
                     }
-                    ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
+
+                    if (reportError)
+                    {
+                        ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
+                    }
                     return;
                 }
 
@@ -181,9 +233,66 @@ namespace Microsoft.Data.SqlClient.SNI
             _status = TdsEnums.SNI_SUCCESS;
         }
 
-        private static Socket Connect(string serverName, int port, TimeSpan timeout, bool isInfiniteTimeout)
+        // kz 
+        private Socket TryConnectParallel(string hostName, int port, TimeSpan ts, bool isInfiniteTimeOut, ref bool callerReportError, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo)
         {
+            Socket availableSocket = null;
+            Task<Socket> connectTask;
+
+            Task<IPAddress[]> serverAddrTask = Dns.GetHostAddressesAsync(hostName);
+            serverAddrTask.Wait(ts);
+            IPAddress[] serverAddresses = serverAddrTask.Result;
+
+            if (serverAddresses.Length > MaxParallelIpAddresses)
+            {
+                // Fail if above 64 to match legacy behavior
+                callerReportError = false;
+                ReportTcpSNIError(0, SNICommon.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
+                return availableSocket;
+            }
+
+            string IPv4String = null;
+            string IPv6String = null;
+
+            foreach (IPAddress ipAddress in serverAddresses)
+            {
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    IPv4String = ipAddress.ToString();
+                }
+                else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    IPv6String = ipAddress.ToString();
+                }
+            }
+
+            if (IPv4String != null || IPv6String != null)
+            {
+                pendingDNSInfo = new AzureSQLDNSInfo(cachedFQDN, IPv4String, IPv6String, port.ToString());
+            }
+
+            connectTask = ParallelConnectAsync(serverAddresses, port);
+
+            if (!(isInfiniteTimeOut ? connectTask.Wait(-1) : connectTask.Wait(ts)))
+            {
+                callerReportError = false;
+                ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
+                return availableSocket;
+            }
+
+            availableSocket = connectTask.Result;
+            return availableSocket;
+
+        }
+
+        private static Socket Connect(string serverName, int port, TimeSpan timeout, bool isInfiniteTimeout, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo)
+        {
+            // kz need to try with cached IP if resolving serverName fails
             IPAddress[] ipAddresses = Dns.GetHostAddresses(serverName);
+
+            string IPv4String = null;
+            string IPv6String = null;
+
             IPAddress serverIPv4 = null;
             IPAddress serverIPv6 = null;
             foreach (IPAddress ipAddress in ipAddresses)
@@ -191,14 +300,21 @@ namespace Microsoft.Data.SqlClient.SNI
                 if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
                     serverIPv4 = ipAddress;
+                    IPv4String = ipAddress.ToString();
                 }
                 else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
                     serverIPv6 = ipAddress;
+                    IPv6String = ipAddress.ToString();
                 }
             }
             ipAddresses = new IPAddress[] { serverIPv4, serverIPv6 };
             Socket[] sockets = new Socket[2];
+
+            if (IPv4String != null || IPv6String != null)
+            {
+                pendingDNSInfo = new AzureSQLDNSInfo(cachedFQDN, IPv4String, IPv6String, port.ToString());
+            }
 
             CancellationTokenSource cts = null;
             

@@ -177,7 +177,7 @@ namespace Microsoft.Data.SqlClient
             }
         }
 
-        // kz to do?
+        // kz
         // constructs SNI Handle for MARS session
         internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent, AzureSQLDNSInfo cachedDNSInfo) : base(IntPtr.Zero, true)
         {

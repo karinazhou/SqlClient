@@ -515,6 +515,18 @@ namespace Microsoft.Data.SqlClient
         /// <include file='../../../../doc/snippets/Microsoft.Data.SqlClient/SqlConnection.xml' path='docs/members[@name="SqlConnection"]/ClientConnectionId/*'/>
         [System.ComponentModel.DesignerSerializationVisibilityAttribute(0)]
         public System.Guid ClientConnectionId { get { throw null; } }
+
+        /// 
+        /// kz for internal use only
+        ///
+         [System.ComponentModel.DesignerSerializationVisibilityAttribute(0)]
+        public string AzureSQLDNSCachingSupportedState { get { throw null; } }
+        /// 
+        /// kz for internal use only
+        ///
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(0)]
+        public string RedirectAzureSQLDNSCachingSupportedState { get { throw null; } }
+
         object System.ICloneable.Clone() { throw null; }
         /// <include file='../../../../doc/snippets/Microsoft.Data.SqlClient/SqlConnection.xml' path='docs/members[@name="SqlConnection"]/ConnectionString/*'/>
         [System.ComponentModel.DefaultValueAttribute("")]

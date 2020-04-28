@@ -138,6 +138,10 @@
     <Compile Include="..\..\src\Microsoft\Data\SqlTypes\SqlTypeWorkarounds.cs">
       <Link>Microsoft\Data\SqlTypes\SqlTypeWorkarounds.cs</Link>
     </Compile>
+    <!-- kz -->
+    <Compile Include="..\..\src\Microsoft\Data\SqlClient\AzureSQLDNSCache.cs">
+      <Link>Microsoft\Data\SqlClient\AzureSQLDNSCache.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetGroup)' == 'netcoreapp' OR '$(IsUAPAssembly)' == 'true'">
     <Compile Include="Microsoft.Data.SqlClient.TypeForwards.cs" />

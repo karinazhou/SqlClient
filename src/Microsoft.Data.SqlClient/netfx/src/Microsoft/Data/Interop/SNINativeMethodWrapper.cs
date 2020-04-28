@@ -622,11 +622,7 @@ namespace Microsoft.Data.SqlClient
             ret = SNIGetPeerAddrStrWrapper(pConn, bufferSize, addrBuffer, out connIPLen);
             Debug.Assert(ret == ERROR_SUCCESS, "SNIGetPeerAddrStrWrapper fail");
 
-
             connIPStr = addrBuffer.ToString(0, Convert.ToInt32(connIPLen));
-
-            // Console.WriteLine("connIPLen : " + connIPLen);
-            // Console.WriteLine("connIPStr : " + connIPStr);
 
             return ret;
         }

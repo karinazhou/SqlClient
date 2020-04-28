@@ -128,6 +128,66 @@ namespace Microsoft.Data.SqlClient
         private readonly ActiveDirectoryAuthenticationTimeoutRetryHelper _activeDirectoryAuthTimeoutRetryHelper;
         private readonly SqlAuthenticationProviderManager _sqlAuthenticationProviderManager;
 
+        // kz AzureSQLDNSCaching related
+        #region kz DNSCaching
+
+        internal bool _cleanAzureSQLDNSCaching = false;
+
+        private bool _serverSupportsDNSCaching = false;
+
+        /// <summary>
+        /// Get or set if AzureSQLDNSCaching is supported by the server.
+        /// </summary>
+        internal bool IsAzureSQLDNSCachingSupported
+        {
+            get
+            {
+                return _serverSupportsDNSCaching;
+            }
+            set
+            {
+                _serverSupportsDNSCaching = value;
+            }
+        }
+
+        private bool _AzureSQLDNSRetryEnabled = false;
+
+        /// <summary>
+        /// Get or set if we need retrying with IP received from FeatureExtAck.
+        /// </summary>
+        internal bool IsAzureSQLDNSRetryEnabled
+        {
+            get
+            {
+                return _AzureSQLDNSRetryEnabled;
+            }
+            set
+            {
+                _AzureSQLDNSRetryEnabled = value;
+            }
+        }
+
+        private bool _redirectDNSCachingSupported = false;
+
+        /// <summary>
+        /// Get or set if the control ring send redirect token and feature ext ack with true for DNSCaching
+        /// </summary>
+        internal bool IsRedirectDNSCachingSupported
+        {
+            get
+            {
+                return _redirectDNSCachingSupported;
+            }
+            set
+            {
+                _redirectDNSCachingSupported = value;
+            }
+        }
+
+       internal AzureSQLDNSInfo pendingAzureSQLDNSObject = null;   
+
+        #endregion kz DNSCaching
+
         // TCE flags
         internal byte _tceVersionSupported;
 
@@ -1246,6 +1306,14 @@ namespace Microsoft.Data.SqlClient
             // The GLOBALTRANSACTIONS, DATACLASSIFICATION, TCE, and UTF8 support features are implicitly requested
             requestedFeatures |= TdsEnums.FeatureExtension.GlobalTransactions | TdsEnums.FeatureExtension.DataClassification | TdsEnums.FeatureExtension.Tce | TdsEnums.FeatureExtension.UTF8Support;
 
+            // kz
+            #region kz DNSCaching
+
+            // The AzureSQLDNSCaching feature is implicitly set
+            requestedFeatures |= TdsEnums.FeatureExtension.AzureSQLDNSCaching;
+
+            #endregion kz DNSCaching
+
             _parser.TdsLogin(login, requestedFeatures, _recoverySessionData, _fedAuthFeatureExtensionData);
         }
 
@@ -2332,8 +2400,14 @@ namespace Microsoft.Data.SqlClient
         {
             if (RoutingInfo != null)
             {
-                return;
+                // kz 
+                #region kz DNSCaching
+                if (TdsEnums.FEATUREEXT_AZURESQLDNSCACHING != featureId) {
+                    return;
+                }
+                #endregion kz DNSCaching
             }
+            
             switch (featureId)
             {
                 case TdsEnums.FEATUREEXT_SRECOVERY:
@@ -2520,6 +2594,43 @@ namespace Microsoft.Data.SqlClient
                         _parser.DataClassificationVersion = (enabled == 0) ? TdsEnums.DATA_CLASSIFICATION_NOT_ENABLED : supportedDataClassificationVersion;
                         break;
                     }
+                                // kz
+                #region kz DNSCaching
+                case TdsEnums.FEATUREEXT_AZURESQLDNSCACHING:
+                    {
+                        SqlClientEventSource.Log.AdvancedTraceEvent("<sc.SqlInternalConnectionTds.OnFeatureExtAck|ADV> {0}, Received feature extension acknowledgement for AZURESQLDNSCACHING", ObjectID);
+
+                        if (data.Length < 1)
+                        {
+                            SqlClientEventSource.Log.TraceEvent("<sc.SqlInternalConnectionTds.OnFeatureExtAck|ERR> {0}, Unknown token for AZURESQLDNSCACHING", ObjectID);
+                            throw SQL.ParsingError(ParsingErrorState.CorruptedTdsStream);
+                        }
+
+                        if (1 == data[0]) {
+                            IsAzureSQLDNSCachingSupported = true;
+                            _cleanAzureSQLDNSCaching = false;
+                            
+                            if (RoutingInfo != null)
+                            {
+                                IsRedirectDNSCachingSupported = true;
+                            }
+                        }
+                        else {
+                            // we receive the IsSupported whose value is 0
+                            IsAzureSQLDNSCachingSupported = false;
+                            _cleanAzureSQLDNSCaching = true;
+                        }
+
+                        // need to add more steps for phrase 2
+                        // get IPv4 + IPv6 + Port number 
+                        // not put them in the DNS cache at this point but need to store them somewhere
+
+                        // generate pendingAzureSQLDNSObject and turn on IsAzureSQLDNSRetryEnabled flag
+
+                        break;
+                    }
+                #endregion kz DNSCaching
+
                 default:
                     {
                         // Unknown feature ack 

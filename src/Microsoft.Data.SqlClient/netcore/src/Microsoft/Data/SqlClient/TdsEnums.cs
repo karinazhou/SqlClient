@@ -215,6 +215,13 @@ namespace Microsoft.Data.SqlClient
         public const byte FEATUREEXT_DATACLASSIFICATION = 0x09;
         public const byte FEATUREEXT_UTF8SUPPORT = 0x0A;
 
+        // kz
+        #region kz DNSCaching
+        // refer to FEATUREEXT_GLOBALTRANSACTIONS where FeatureData = No Data
+        public const byte FEATUREEXT_AZURESQLDNSCACHING = 0x0B;
+
+        #endregion kz DNSCaching
+
         [Flags]
         public enum FeatureExtension : uint
         {
@@ -226,6 +233,11 @@ namespace Microsoft.Data.SqlClient
             AzureSQLSupport = 1 << (TdsEnums.FEATUREEXT_AZURESQLSUPPORT - 1),
             DataClassification = 1 << (TdsEnums.FEATUREEXT_DATACLASSIFICATION - 1),
             UTF8Support = 1 << (TdsEnums.FEATUREEXT_UTF8SUPPORT - 1),
+            // kz
+            #region kz DNSCaching
+            AzureSQLDNSCaching = 1 << (TdsEnums.FEATUREEXT_AZURESQLDNSCACHING - 1)
+
+            #endregion kz DNSCaching
         }
 
         public const uint UTF8_IN_TDSCOLLATION = 0x4000000;
