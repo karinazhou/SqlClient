@@ -150,7 +150,7 @@ namespace Microsoft.Data.SqlClient.SNI
                 catch (Exception ex)
                 {
                     // Retry with cached IP address
-                    if (ex is SocketException || ex is ArgumentException)
+                    if (ex is SocketException || ex is ArgumentException || ex is AggregateException)
                     {                       
                         if (hasCachedDNSInfo == false)
                         {
@@ -173,7 +173,8 @@ namespace Microsoft.Data.SqlClient.SNI
                             }
                             catch(Exception exRetry)
                             {
-                                if (exRetry is SocketException || exRetry is ArgumentNullException || exRetry is ArgumentException || exRetry is ArgumentOutOfRangeException)
+                                if (exRetry is SocketException || exRetry is ArgumentNullException 
+                                    || exRetry is ArgumentException || exRetry is ArgumentOutOfRangeException || exRetry is AggregateException)
                                 {
                                     if (parallel)
                                     {
