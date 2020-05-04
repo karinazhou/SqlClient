@@ -499,8 +499,7 @@ namespace Microsoft.Data.SqlClient
                               ServerCertificateValidationCallback serverCallback,
                               ClientCertificateRetrievalCallback clientCallback,
                               bool useOriginalAddressInfo,
-                              bool disableTnir,
-                              SqlAuthenticationProviderManager sqlAuthProviderManager)
+                              bool disableTnir)
         {
             if (_state != TdsParserState.Closed)
             {
@@ -3433,11 +3432,10 @@ namespace Microsoft.Data.SqlClient
                 }
             }
 
-            // _attentionSent set by 'SendAttention'
             // _pendingData set by e.g. 'TdsExecuteSQLBatch'
             // _hasOpenResult always set to true by 'WriteMarsHeader'
             //
-            if (!stateObj._attentionSent && !stateObj._pendingData && stateObj._hasOpenResult)
+            if (!stateObj._pendingData && stateObj._hasOpenResult)
             {
                 /*
                                 Debug.Assert(!((sqlTransaction != null               && _distributedTransaction != null) ||

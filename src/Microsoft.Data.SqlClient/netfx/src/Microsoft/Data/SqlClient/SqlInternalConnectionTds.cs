@@ -424,9 +424,7 @@ namespace Microsoft.Data.SqlClient
                 DbConnectionPool pool = null,
                 string accessToken = null,
                 SqlClientOriginalNetworkAddressInfo originalNetworkAddressInfo = null,
-                bool applyTransientFaultHandling = false,
-                SqlAuthenticationProviderManager sqlAuthProviderManager = null
-                ) : base(connectionOptions)
+                bool applyTransientFaultHandling = false) : base(connectionOptions)
         {
 
 #if DEBUG
@@ -482,7 +480,7 @@ namespace Microsoft.Data.SqlClient
             }
 
             _activeDirectoryAuthTimeoutRetryHelper = new ActiveDirectoryAuthenticationTimeoutRetryHelper();
-            _sqlAuthenticationProviderManager = sqlAuthProviderManager ?? SqlAuthenticationProviderManager.Instance;
+            _sqlAuthenticationProviderManager = SqlAuthenticationProviderManager.Instance;
 
             _serverCallback = serverCallback;
             _clientCallback = clientCallback;
@@ -2272,8 +2270,7 @@ namespace Microsoft.Data.SqlClient
                             _serverCallback,
                             _clientCallback,
                             _originalNetworkAddressInfo != null,
-                            disableTnir,
-                            _sqlAuthenticationProviderManager);
+                            disableTnir);
 
             timeoutErrorInternal.EndPhase(SqlConnectionTimeoutErrorPhase.ConsumePreLoginHandshake);
             timeoutErrorInternal.SetAndBeginPhase(SqlConnectionTimeoutErrorPhase.LoginBegin);
