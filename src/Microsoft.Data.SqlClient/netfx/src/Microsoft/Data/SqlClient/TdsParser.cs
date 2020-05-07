@@ -281,15 +281,7 @@ namespace Microsoft.Data.SqlClient
         internal string EnclaveType { get; set; }
 
         #region kz DNSCache
-        private bool _isTcpProtocol = false;
-
-        internal bool isTcpProtocol
-        {
-            get
-            {
-                return _isTcpProtocol;
-            }
-        }
+        internal bool isTcpProtocol { get; set; }
 
         internal string FQDNforDNSCahce { get; set; }
 
@@ -700,30 +692,30 @@ namespace Microsoft.Data.SqlClient
             ushort portFromSNI = 0;
             string IPStringFromSNI = string.Empty;
             IPAddress IPFromSNI;
-            _isTcpProtocol = false;
+            isTcpProtocol = false;
             SNINativeMethodWrapper.ProviderEnum providerNumber = SNINativeMethodWrapper.ProviderEnum.INVALID_PROV;
 
             if (string.IsNullOrEmpty(userProtocol))
             {
                 
                 result = SNINativeMethodWrapper.SniGetProviderNumber(_physicalStateObj.Handle, ref providerNumber);
-                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "KZ : Unexpected failure state upon calling SniGetProviderNumber");
-                _isTcpProtocol = (providerNumber == SNINativeMethodWrapper.ProviderEnum.TCP_PROV);
+                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetProviderNumber");
+                isTcpProtocol = (providerNumber == SNINativeMethodWrapper.ProviderEnum.TCP_PROV);
             }
             else if (userProtocol == TdsEnums.TCP) 
             {
-                _isTcpProtocol = true;
+                isTcpProtocol = true;
             }
 
             // serverInfo.UserProtocol could be empty
-            if (_isTcpProtocol)
+            if (isTcpProtocol)
             {
                 result = SNINativeMethodWrapper.SniGetConnectionPort(_physicalStateObj.Handle, ref portFromSNI);
-                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "KZ : Unexpected failure state upon calling SniGetConnectionPort");
+                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionPort");
 
 
                 result = SNINativeMethodWrapper.SniGetConnectionIPString(_physicalStateObj.Handle, ref IPStringFromSNI);
-                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "KZ : Unexpected failure state upon calling SniGetConnectionIPString");
+                Debug.Assert(result == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionIPString");
 
                 _connHandler.pendingAzureSQLDNSObject = new AzureSQLDNSInfo(DNSCacheKey, null, null, portFromSNI.ToString());
 
@@ -752,7 +744,6 @@ namespace Microsoft.Data.SqlClient
             {
                 _connHandler.pendingAzureSQLDNSObject = null;
             }
-
         }
 
         internal void RemoveEncryption()

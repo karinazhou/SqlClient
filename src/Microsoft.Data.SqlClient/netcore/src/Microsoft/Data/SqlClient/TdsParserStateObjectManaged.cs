@@ -66,6 +66,12 @@ namespace Microsoft.Data.SqlClient.SNI
             }
         }
 
+        // kz
+        internal override void AssignPendingDNSInfo(string userProtocol, string DNSCacheKey, ref AzureSQLDNSInfo pendingDNSInfo)
+        {
+            // No-op
+        }
+
         internal void ReadAsyncCallback(SNIPacket packet, uint error) => ReadAsyncCallback(IntPtr.Zero, PacketHandle.FromManagedPacket(packet), error);
 
         internal void WriteAsyncCallback(SNIPacket packet, uint sniError) => WriteAsyncCallback(IntPtr.Zero, PacketHandle.FromManagedPacket(packet), sniError);

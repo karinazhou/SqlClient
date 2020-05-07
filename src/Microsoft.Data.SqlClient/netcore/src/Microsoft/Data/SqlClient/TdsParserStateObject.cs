@@ -765,6 +765,8 @@ namespace Microsoft.Data.SqlClient
         // kz
         internal abstract void CreatePhysicalSNIHandle(string serverName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool fParallel, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo, bool isIntegratedSecurity = false);
 
+        internal abstract void AssignPendingDNSInfo(string userProtocol, string DNSCacheKey, ref AzureSQLDNSInfo pendingDNSInfo);
+
         internal abstract uint SniGetConnectionId(ref Guid clientConnectionId);
 
         internal abstract bool IsFailedHandle();

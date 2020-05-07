@@ -133,6 +133,7 @@ namespace Microsoft.Data.SqlClient
         private readonly uint _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
+        // kz
         // creates a physical connection
         internal SNIHandle(
             SNINativeMethodWrapper.ConsumerInfo myInfo,
@@ -143,7 +144,8 @@ namespace Microsoft.Data.SqlClient
             out byte[] instanceName,
             bool flushCache,
             bool fSync,
-            bool fParallel)
+            bool fParallel,
+            AzureSQLDNSInfo cachedDNSInfo)
             : base(IntPtr.Zero, true)
         {
             try
@@ -158,18 +160,19 @@ namespace Microsoft.Data.SqlClient
                 }
 
                 _status = SNINativeMethodWrapper.SNIOpenSyncEx(myInfo, serverName, ref base.handle,
-                            spnBuffer, instanceName, flushCache, fSync, timeout, fParallel);
+                            spnBuffer, instanceName, flushCache, fSync, timeout, fParallel, cachedDNSInfo);
             }
         }
 
+        // kz
         // constructs SNI Handle for MARS session
-        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent) : base(IntPtr.Zero, true)
+        internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent, AzureSQLDNSInfo cachedDNSInfo) : base(IntPtr.Zero, true)
         {
             try
             { }
             finally
             {
-                _status = SNINativeMethodWrapper.SNIOpenMarsSession(myInfo, parent, ref base.handle, parent._fSync);
+                _status = SNINativeMethodWrapper.SNIOpenMarsSession(myInfo, parent, ref base.handle, parent._fSync, cachedDNSInfo);
             }
         }
 

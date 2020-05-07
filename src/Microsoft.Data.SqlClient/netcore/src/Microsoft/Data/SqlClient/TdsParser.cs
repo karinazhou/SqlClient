@@ -159,7 +159,7 @@ namespace Microsoft.Data.SqlClient
 
         // kz
         #region kz DNSCache
-
+        internal bool isTcpProtocol { get; set; }
         internal string FQDNforDNSCahce { get; set; }
 
         #endregion kz DNSCache
@@ -464,6 +464,13 @@ namespace Microsoft.Data.SqlClient
 
             uint result = _physicalStateObj.SniGetConnectionId(ref _connHandler._clientConnectionId);
             Debug.Assert(result == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionId");
+            
+            // kz
+            if (null == _connHandler.pendingAzureSQLDNSObject)
+            {
+                _physicalStateObj.AssignPendingDNSInfo(serverInfo.UserProtocol, FQDNforDNSCahce, ref _connHandler.pendingAzureSQLDNSObject);
+            }
+            
             SqlClientEventSource.Log.TraceEvent("<sc.TdsParser.Connect|{0}> Sending prelogin handshake", "SEC");
             SendPreLoginHandshake(instanceName, encrypt);
 
@@ -496,6 +503,12 @@ namespace Microsoft.Data.SqlClient
 
                 Debug.Assert(retCode == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionId");
                 SqlClientEventSource.Log.TraceEvent("<sc.TdsParser.Connect|{0}> Sending prelogin handshake", "SEC");
+
+                // kz
+                if (null == _connHandler.pendingAzureSQLDNSObject)
+                {
+                    _physicalStateObj.AssignPendingDNSInfo(serverInfo.UserProtocol, FQDNforDNSCahce, ref _connHandler.pendingAzureSQLDNSObject);
+                }
 
                 SendPreLoginHandshake(instanceName, encrypt);
                 status = ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out marsCapable, out _connHandler._fedAuthRequired);
