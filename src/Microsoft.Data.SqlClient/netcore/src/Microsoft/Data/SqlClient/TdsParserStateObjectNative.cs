@@ -43,7 +43,6 @@ namespace Microsoft.Data.SqlClient
             TdsParserStateObjectNative nativeSNIObject = physicalConnection as TdsParserStateObjectNative;
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);
 
-            // kz
             AzureSQLDNSInfo cachedDNSInfo;
             bool ret = AzureSQLDNSCache.Instance.GetDNSInfo(_parser.FQDNforDNSCahce, out cachedDNSInfo);
 
@@ -93,15 +92,6 @@ namespace Microsoft.Data.SqlClient
                     {
                         pendingDNSInfo.AddrIPv6 = IPStringFromSNI;
                     }
-
-                    // kz for testing
-                    // Console.WriteLine("pendingAzureSQLDNSObject.FQDN: " + _connHandler.pendingAzureSQLDNSObject.FQDN);
-                    // Console.WriteLine("pendingAzureSQLDNSObject.AddrIPv4: " + _connHandler.pendingAzureSQLDNSObject.AddrIPv4);
-                    // Console.WriteLine("pendingAzureSQLDNSObject.Port: " + _connHandler.pendingAzureSQLDNSObject.Port);
-                }
-                else
-                {
-                    Console.WriteLine("kz test: invalid IPStringFromSNI " + IPStringFromSNI);
                 }
             }
             else
@@ -128,7 +118,6 @@ namespace Microsoft.Data.SqlClient
             return myInfo;
         }
 
-        // kz
         internal override void CreatePhysicalSNIHandle(string serverName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, ref byte[] spnBuffer, bool flushCache, bool async, bool fParallel, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo, bool isIntegratedSecurity)
         {
             // We assume that the loadSSPILibrary has been called already. now allocate proper length of buffer

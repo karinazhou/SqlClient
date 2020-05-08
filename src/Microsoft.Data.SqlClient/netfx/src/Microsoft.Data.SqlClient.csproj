@@ -195,7 +195,6 @@
     <Compile Include="..\..\src\Microsoft\Data\SqlTypes\SqlTypeWorkarounds.cs">
       <Link>Microsoft\Data\SqlTypes\SqlTypeWorkarounds.cs</Link>
     </Compile>
-    <!-- kz -->
     <Compile Include="..\..\src\Microsoft\Data\SqlClient\AzureSQLDNSCache.cs">
       <Link>Microsoft\Data\SqlClient\AzureSQLDNSCache.cs</Link>
     </Compile>
@@ -383,8 +382,6 @@
     <Compile Include="Microsoft\Data\SqlClient\Server\sqlnorm.cs" />
     <Compile Include="Microsoft\Data\ProviderBase\FieldNameLookup.cs" />
     <Compile Include="Microsoft\Data\OperationAbortedException.cs" />
-    <!-- kz -->
-    <!-- <Compile Include="Microsoft\Data\SqlClient\AzureSQLDNSCache.cs" /> -->
   </ItemGroup>
   <ItemGroup Condition="'$(BuildSimulator)' == 'true'">
     <Compile Include="Microsoft\Data\SqlClient\SimulatorEnclaveProvider.cs" />

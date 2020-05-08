@@ -52,12 +52,7 @@ namespace Microsoft.Data.SqlClient
         internal const int LocalDBInvalidSqlUserInstanceDllPath = 55;
         internal const int LocalDBFailedToLoadDll = 56;
         internal const int LocalDBBadRuntime = 57;
-
-        // kz 
-        #region kz DNSCaching
         internal const int SniIP6AddrStringBufferLength = 48; // from SNI layer
-
-        #endregion kz DNSCaching
 
         static SNINativeMethodWrapper()
         {
@@ -374,11 +369,8 @@ namespace Microsoft.Data.SqlClient
             public TransparentNetworkResolutionMode transparentNetworkResolution;
             public int totalTimeout;
             public bool isAzureSqlServerEndpoint;
-            // kz
             public SNI_DNSCache_Info DNSCacheInfo;
         }
-
-        #region kz DNS Caching2
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct SNI_DNSCache_Info
@@ -392,8 +384,6 @@ namespace Microsoft.Data.SqlClient
             [MarshalAs(UnmanagedType.LPWStr)]
             public string wszCachedTcpPort;
         }
-
-        #endregion kz DNS Caching2
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct SNI_Error
@@ -485,8 +475,6 @@ namespace Microsoft.Data.SqlClient
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint SNIGetInfoWrapper([In] SNIHandle pConn, SNINativeMethodWrapper.QTypes QType, ref IntPtr pbQInfo);
 
-        // kz
-        #region kz DNS Caching
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint SNIGetInfoWrapper([In] SNIHandle pConn, SNINativeMethodWrapper.QTypes QType, out ushort portNum);
 
@@ -496,8 +484,6 @@ namespace Microsoft.Data.SqlClient
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint SNIGetInfoWrapper([In] SNIHandle pConn, SNINativeMethodWrapper.QTypes QType, out ProviderEnum provNum);
 
-        // kz
-        #endregion kz DNS Caching
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SNIInitialize")]
         private static extern uint SNIInitialize([In] IntPtr pmo);
@@ -505,7 +491,6 @@ namespace Microsoft.Data.SqlClient
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint SNIOpenSyncExWrapper(ref SNI_CLIENT_CONSUMER_INFO pClientConsumerInfo, out IntPtr ppConn);
 
-        // kz need to modify this for MARS
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern uint SNIOpenWrapper(
             [In] ref Sni_Consumer_Info pConsumerInfo,
@@ -596,10 +581,7 @@ namespace Microsoft.Data.SqlClient
         {
             return SNIGetInfoWrapper(pConn, QTypes.SNI_QUERY_CONN_CONNID, out connId);
         }
-
-        // kz
-        #region kz DNSCaching
-        
+      
         internal static uint SniGetProviderNumber(SNIHandle pConn, ref ProviderEnum provNum)
         {
             return SNIGetInfoWrapper(pConn, QTypes.SNI_QUERY_CONN_PROVIDERNUM, out provNum);
@@ -627,16 +609,11 @@ namespace Microsoft.Data.SqlClient
             return ret;
         }
 
-        // kz
-        #endregion kz DNSCaching
-
         internal static uint SNIInitialize()
         {
             return SNIInitialize(IntPtr.Zero);
         }
 
-        // kz apply DNS caching for MARS
-        // to do : wrap cachedTcpIpInfo into struct
         internal static unsafe uint SNIOpenMarsSession(ConsumerInfo consumerInfo, SNIHandle parent, ref IntPtr pConn, bool fSync, AzureSQLDNSInfo cachedDNSInfo)
         {
             // initialize consumer info for MARS
@@ -652,7 +629,6 @@ namespace Microsoft.Data.SqlClient
             return SNIOpenWrapper(ref native_consumerInfo, "session:", parent, out pConn, fSync, ref native_cachedDNSInfo);
         }
 
-        // kz to do
         internal static unsafe uint SNIOpenSyncEx(ConsumerInfo consumerInfo, 
                                                   string constring, 
                                                   ref IntPtr pConn, 

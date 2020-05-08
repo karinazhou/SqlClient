@@ -280,12 +280,9 @@ namespace Microsoft.Data.SqlClient
         /// </summary>
         internal string EnclaveType { get; set; }
 
-        #region kz DNSCache
         internal bool isTcpProtocol { get; set; }
 
         internal string FQDNforDNSCahce { get; set; }
-
-        #endregion kz DNSCache
 
         /// <summary>
         /// Get if data classification is enabled by the server.
@@ -502,7 +499,7 @@ namespace Microsoft.Data.SqlClient
             _connHandler = connHandler;
             _loginWithFailover = withFailover;
 
-            // kz clean up IsAzureSQLDNSCachingSupported flag from previous status
+            // Clean up IsAzureSQLDNSCachingSupported flag from previous status
             _connHandler.IsAzureSQLDNSCachingSupported = false;
 
             UInt32 sniStatus = SNILoadHandle.SingletonInstance.SNIStatus;
@@ -568,7 +565,6 @@ namespace Microsoft.Data.SqlClient
 
             int totalTimeout = _connHandler.ConnectionOptions.ConnectTimeout;
 
-            // kz DNS Cache
             FQDNforDNSCahce = serverInfo.ResolvedServerName;
 
             int commaPos = FQDNforDNSCahce.IndexOf(",");
@@ -618,7 +614,7 @@ namespace Microsoft.Data.SqlClient
             UInt32 result = SNINativeMethodWrapper.SniGetConnectionId(_physicalStateObj.Handle, ref _connHandler._clientConnectionId);
             Debug.Assert(result == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionId");
   
-            // kz for phase 1
+            // for DNS Caching phase 1
             AssignPendingDNSInfo(serverInfo.UserProtocol, FQDNforDNSCahce);
 
             // UNDONE - send "" for instance now, need to fix later
@@ -655,7 +651,7 @@ namespace Microsoft.Data.SqlClient
                 Debug.Assert(retCode == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionId");
                 SqlClientEventSource.Log.TraceEvent("<sc.TdsParser.Connect|{0}> Sending prelogin handshake", "SEC");
 
-                // kz
+                // for DNS Caching phase 1
                 AssignPendingDNSInfo(serverInfo.UserProtocol, FQDNforDNSCahce);
 
                 SendPreLoginHandshake(instanceName, encrypt, !string.IsNullOrEmpty(certificate), useOriginalAddressInfo);
@@ -685,7 +681,6 @@ namespace Microsoft.Data.SqlClient
             return;
         }
 
-        // kz 
         internal void AssignPendingDNSInfo(string userProtocol, string DNSCacheKey)
         {
             UInt32 result;
@@ -729,15 +724,6 @@ namespace Microsoft.Data.SqlClient
                     {
                         _connHandler.pendingAzureSQLDNSObject.AddrIPv6 = IPStringFromSNI;
                     }
-
-                    // kz for testing
-                    // Console.WriteLine("pendingAzureSQLDNSObject.FQDN: " + _connHandler.pendingAzureSQLDNSObject.FQDN);
-                    // Console.WriteLine("pendingAzureSQLDNSObject.AddrIPv4: " + _connHandler.pendingAzureSQLDNSObject.AddrIPv4);
-                    // Console.WriteLine("pendingAzureSQLDNSObject.Port: " + _connHandler.pendingAzureSQLDNSObject.Port);
-                }
-                else
-                {
-                    Console.WriteLine("kz test: invalid IPStringFromSNI " + IPStringFromSNI);
                 }
             }
             else
@@ -3545,7 +3531,7 @@ namespace Microsoft.Data.SqlClient
                 }
             } while (featureId != TdsEnums.FEATUREEXT_TERMINATOR);
 
-            // kz write to DNS Cache or clean up DNS Cache for TCP protocol
+            // Write to DNS Cache or clean up DNS Cache for TCP protocol
             bool ret = false;
             if (_connHandler._cleanAzureSQLDNSCaching)
             {
@@ -8631,8 +8617,6 @@ namespace Microsoft.Data.SqlClient
             return len;
         }
 
-        // kz
-        #region kz DNSCaching
         internal int WriteAzureSQLDNSCachingFeatureRequest(bool write /* if false just calculates the length */)
         {
             int len = 5; // 1byte = featureID, 4bytes = featureData length
@@ -8646,8 +8630,6 @@ namespace Microsoft.Data.SqlClient
 
             return len;
         }
-
-        #endregion kz DNSCaching
 
         internal void TdsLogin(SqlLogin rec,
                                TdsEnums.FeatureExtension requestedFeatures,
@@ -8837,14 +8819,10 @@ namespace Microsoft.Data.SqlClient
                         length += WriteUTF8SupportFeatureRequest(false);
                     }
 
-                    // kz
-                    #region kz DNSCaching
                     if ((requestedFeatures & TdsEnums.FeatureExtension.AzureSQLDNSCaching) != 0)
                     {
                         length += WriteAzureSQLDNSCachingFeatureRequest(false);
                     }
-
-                    #endregion kz DNSCaching
 
                     length++; // for terminator
                 }
@@ -9118,15 +9096,10 @@ namespace Microsoft.Data.SqlClient
                         WriteUTF8SupportFeatureRequest(true);
                     }
 
-                    // kz
-                    #region kz DNSCaching
-
                     if ((requestedFeatures & TdsEnums.FeatureExtension.AzureSQLDNSCaching) != 0)
                     {
                         WriteAzureSQLDNSCachingFeatureRequest(true);
                     }
-
-                    #endregion kz DNSCaching
 
                     _physicalStateObj.WriteByte(0xFF); // terminator
                 }

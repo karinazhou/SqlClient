@@ -142,9 +142,6 @@ namespace Microsoft.Data.SqlClient
         ClientCertificateRetrievalCallback _clientCallback;
         SqlClientOriginalNetworkAddressInfo _originalNetworkAddressInfo;
 
-                // kz AzureSQLDNSCaching related
-        #region kz DNSCaching
-
         internal bool _cleanAzureSQLDNSCaching = false;
 
         private bool _serverSupportsDNSCaching = false;
@@ -199,9 +196,6 @@ namespace Microsoft.Data.SqlClient
         }
 
         internal AzureSQLDNSInfo pendingAzureSQLDNSObject = null;
-        
-
-        #endregion kz DNSCaching
 
         // TCE flags
         internal byte _tceVersionSupported;
@@ -1589,13 +1583,8 @@ namespace Microsoft.Data.SqlClient
                 requestedFeatures |= TdsEnums.FeatureExtension.AzureSQLSupport;
             }
 
-            // kz
-            #region kz DNSCaching
-
             // The AzureSQLDNSCaching feature is implicitly set
             requestedFeatures |= TdsEnums.FeatureExtension.AzureSQLDNSCaching;
-
-            #endregion kz DNSCaching
 
             _parser.TdsLogin(login, requestedFeatures, _recoverySessionData, _fedAuthFeatureExtensionData, _originalNetworkAddressInfo);
         }
@@ -2880,12 +2869,9 @@ namespace Microsoft.Data.SqlClient
         {
             if (_routingInfo != null)
             {
-                // kz 
-                #region kz DNSCaching
                 if (TdsEnums.FEATUREEXT_AZURESQLDNSCACHING != featureId) {
                     return;
                 }
-                #endregion kz DNSCaching
             }
 
             switch (featureId)
@@ -3101,8 +3087,6 @@ namespace Microsoft.Data.SqlClient
                         break;
                     }
 
-                // kz
-                #region kz DNSCaching
                 case TdsEnums.FEATUREEXT_AZURESQLDNSCACHING:
                     {
                         SqlClientEventSource.Log.AdvancedTraceEvent("<sc.SqlInternalConnectionTds.OnFeatureExtAck|ADV> {0}, Received feature extension acknowledgement for AZURESQLDNSCACHING", ObjectID);
@@ -3136,7 +3120,6 @@ namespace Microsoft.Data.SqlClient
 
                         break;
                     }
-                #endregion kz DNSCaching
 
                 default:
                     {

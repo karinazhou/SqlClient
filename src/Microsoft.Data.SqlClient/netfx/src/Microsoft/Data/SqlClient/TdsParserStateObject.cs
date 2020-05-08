@@ -295,7 +295,6 @@ namespace Microsoft.Data.SqlClient
 
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);
             
-            // kz do we need to pass DNS cache here?
             AzureSQLDNSInfo cachedDNSInfo;
             bool ret = AzureSQLDNSCache.Instance.GetDNSInfo(_parser.FQDNforDNSCahce, out cachedDNSInfo);
 
@@ -825,7 +824,6 @@ namespace Microsoft.Data.SqlClient
             return myInfo;
         }
 
-        // kz
         internal void CreatePhysicalSNIHandle(string serverName, bool ignoreSniOpenTimeout, long timerExpire, out byte[] instanceName, byte[] spnBuffer, bool flushCache, bool async, bool fParallel, TransparentNetworkResolutionState transparentNetworkResolutionState, int totalTimeout, string cachedFQDN)
         {
             SNINativeMethodWrapper.ConsumerInfo myInfo = CreateConsumerInfo(async);

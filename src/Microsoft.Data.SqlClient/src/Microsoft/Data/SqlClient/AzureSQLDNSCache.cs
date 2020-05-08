@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Concurrent;
 
-// kz test
 namespace Microsoft.Data.SqlClient
 {
     internal class AzureSQLDNSCache

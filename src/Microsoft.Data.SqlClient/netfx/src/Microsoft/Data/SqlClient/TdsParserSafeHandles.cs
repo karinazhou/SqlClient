@@ -137,7 +137,6 @@ namespace Microsoft.Data.SqlClient
         private readonly UInt32 _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly bool _fSync = false;
 
-        // kz to do
         // creates a physical connection
         internal SNIHandle(
             SNINativeMethodWrapper.ConsumerInfo myInfo,
@@ -177,7 +176,6 @@ namespace Microsoft.Data.SqlClient
             }
         }
 
-        // kz
         // constructs SNI Handle for MARS session
         internal SNIHandle(SNINativeMethodWrapper.ConsumerInfo myInfo, SNIHandle parent, AzureSQLDNSInfo cachedDNSInfo) : base(IntPtr.Zero, true)
         {

@@ -517,7 +517,6 @@ namespace Microsoft.Data.SqlClient
         /// 
         /// for internal use only
         /// 
-        #region kz DNSCaching
         internal string AzureSQLDNSCachingSupportedState
         {
             get
@@ -560,8 +559,6 @@ namespace Microsoft.Data.SqlClient
                 return result;
             }
         }
-
-        #endregion kz DNSCaching
 
         /// <include file='../../../../../../../doc/snippets/Microsoft.Data.SqlClient/SqlConnection.xml' path='docs/members[@name="SqlConnection"]/DataSource/*' />
         public override string DataSource

@@ -250,7 +250,6 @@ namespace Microsoft.Data.SqlClient.SNI
             return result;
         }
 
-        // kz
         /// <summary>
         /// Create a SNI connection handle
         /// </summary>

@@ -112,15 +112,6 @@ namespace Microsoft.Data.SqlClient.SNI
             AzureSQLDNSInfo cachedDNSInfo;
             bool hasCachedDNSInfo = AzureSQLDNSCache.Instance.GetDNSInfo(cachedFQDN, out cachedDNSInfo);
 
-            // kz debug only
-            if (hasCachedDNSInfo)
-            {
-                Console.WriteLine("cached FQDN : {0}", cachedDNSInfo.FQDN);
-                Console.WriteLine("cached IPv4 : {0}", String.IsNullOrEmpty(cachedDNSInfo.AddrIPv4) ? "Null / Empty" : cachedDNSInfo.AddrIPv4);
-                Console.WriteLine("cached IPv6 : {0}", String.IsNullOrEmpty(cachedDNSInfo.AddrIPv6) ? "Null / Empty" : cachedDNSInfo.AddrIPv6);
-                Console.WriteLine("cached Port : {0}", String.IsNullOrEmpty(cachedDNSInfo.Port) ? "Null / Empty" : cachedDNSInfo.Port);
-            }
-
             try
             {
                 TimeSpan ts = default(TimeSpan);
@@ -234,7 +225,6 @@ namespace Microsoft.Data.SqlClient.SNI
             _status = TdsEnums.SNI_SUCCESS;
         }
 
-        // kz 
         private Socket TryConnectParallel(string hostName, int port, TimeSpan ts, bool isInfiniteTimeOut, ref bool callerReportError, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo)
         {
             Socket availableSocket = null;
@@ -288,7 +278,6 @@ namespace Microsoft.Data.SqlClient.SNI
 
         private static Socket Connect(string serverName, int port, TimeSpan timeout, bool isInfiniteTimeout, string cachedFQDN, ref AzureSQLDNSInfo pendingDNSInfo)
         {
-            // kz need to try with cached IP if resolving serverName fails
             IPAddress[] ipAddresses = Dns.GetHostAddresses(serverName);
 
             string IPv4String = null;

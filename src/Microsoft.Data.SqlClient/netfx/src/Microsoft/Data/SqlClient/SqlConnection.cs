@@ -714,7 +714,6 @@ namespace Microsoft.Data.SqlClient
         /// 
         /// for internal test only
         /// 
-        #region kz DNSCaching
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         internal string AzureSQLDNSCachingSupportedState
         {
@@ -759,9 +758,6 @@ namespace Microsoft.Data.SqlClient
                 return result;
             }
         }
-
-
-        #endregion kz DNSCaching
 
         /// <include file='..\..\..\..\..\..\..\doc\snippets\Microsoft.Data.SqlClient\SqlConnection.xml' path='docs/members[@name="SqlConnection"]/DataSource/*' />
         [
