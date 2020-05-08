@@ -515,10 +515,10 @@ namespace Microsoft.Data.SqlClient
         }
 
         /// 
-        /// kz for internal use only
+        /// for internal use only
         /// 
         #region kz DNSCaching
-        public string AzureSQLDNSCachingSupportedState
+        internal string AzureSQLDNSCachingSupportedState
         {
             get
             {
@@ -539,9 +539,9 @@ namespace Microsoft.Data.SqlClient
         }
 
         /// 
-        /// kz for internal use only
+        /// for internal use only
         /// 
-        public string RedirectAzureSQLDNSCachingSupportedState
+        internal string RedirectAzureSQLDNSCachingSupportedState
         {
             get
             {

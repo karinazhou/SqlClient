@@ -712,11 +712,11 @@ namespace Microsoft.Data.SqlClient
         }
 
         /// 
-        /// kz for internal use only
+        /// for internal test only
         /// 
         #region kz DNSCaching
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string AzureSQLDNSCachingSupportedState
+        internal string AzureSQLDNSCachingSupportedState
         {
             get
             {
@@ -737,10 +737,10 @@ namespace Microsoft.Data.SqlClient
         }
 
         /// 
-        /// kz for internal use only
+        /// for internal test only
         /// 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string RedirectAzureSQLDNSCachingSupportedState
+        internal string RedirectAzureSQLDNSCachingSupportedState
         {
             get
             {
