@@ -156,7 +156,6 @@ namespace Microsoft.Data.SqlClient.ManualTesting.Tests
             
             InternalConnectionWrapper internalConnection = CreateEmancipatedConnection(stringBuilder.ToString());
 
-            ConnectionPoolWrapper connectionPool = internalConnection.ConnectionPool;
             GC.Collect();
             GC.WaitForPendingFinalizers();       
 
